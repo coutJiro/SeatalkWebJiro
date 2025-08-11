@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // SeaTalk webhook callback endpoint
+  // SeaTalk webhook callback endpoint (POST)
   app.post("/callback", (req, res) => {
     // Always respond with JSON
     res.setHeader("Content-Type", "application/json");
@@ -28,6 +28,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle any JSON parsing errors
       res.status(400).json({ error: "Invalid JSON" });
     }
+  });
+
+  // NEW: Allow browser testing for GET /callback
+  app.get("/callback", (_req, res) => {
+    res.status(200).send("Callback endpoint is alive (GET)");
   });
 
   // Health check endpoint
