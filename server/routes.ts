@@ -2,12 +2,12 @@ import { Router } from "express";
 
 const router = Router();
 
-// Example GET API
+// Example API GET
 router.get("/ping", (req, res) => {
   res.json({ message: "pong" });
 });
 
-// Example POST API
+// Example API POST
 router.post("/echo", (req, res) => {
   res.json({ youSent: req.body });
 });
