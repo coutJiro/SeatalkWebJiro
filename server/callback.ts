@@ -2,16 +2,16 @@ import { Router } from "express";
 
 const router = Router();
 
+// Handle SeaTalk webhook
 router.post("/", (req, res) => {
-  console.log("Incoming SeaTalk request:", req.body);
+  console.log("📩 Received POST /callback:", req.body);
 
-  // SeaTalk verification
   if (req.body?.seatalk_challenge) {
-    return res.status(200).send(req.body.seatalk_challenge);
+    // Return the challenge exactly as SeaTalk expects
+    res.send(req.body.seatalk_challenge);
+  } else {
+    res.status(400).send("Missing seatalk_challenge");
   }
-
-  // Handle normal bot events
-  res.status(200).send("OK");
 });
 
 export default router;
