@@ -1,20 +1,18 @@
 import express from "express";
-import bodyParser from "body-parser";
-import routes from "./routes";
-import callbackRoute from "./callback";
 
 const app = express();
+app.use(express.json());
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Normal API routes
-app.use("/api", routes);
-
-// SeaTalk callback route — must be directly at /callback
-app.use("/callback", callbackRoute);
+app.post("/callback", (req, res) => {
+  console.log("Incoming:", req.body);
+  if (req.body?.seatalk_challenge) {
+    res.send(req.body.seatalk_challenge);
+  } else {
+    res.status(400).send("Missing seatalk_challenge");
+  }
+});
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
