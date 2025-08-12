@@ -1,49 +1,43 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { Router } from "express";
+import crypto from "crypto";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // POST /callback: handle SeaTalk webhook and verification challenge
-  app.post("/callback", (req, res) => {
-    console.log("Received /callback POST:", req.body);
+const router = Router();
 
-    res.setHeader("Content-Type", "application/json");
+const APP_ID = process.env.SEATALK_APP_ID || "your-app-id";
+const APP_SECRET = process.env.SEATALK_APP_SECRET || "your-app-secret";
 
-    try {
-      const data = req.body;
-
-      // Check if this is the verification request from SeaTalk
-      if (data?.event?.seatalk_challenge) {
-        const challenge = data.event.seatalk_challenge;
-        console.log("Responding with seatalk_challenge:", challenge);
-        // Respond with the challenge value exactly as required
-        res.status(200).json({ seatalk_challenge: challenge });
-        return;
-      }
-
-      // For other event callbacks, you can handle them here
-      // For now, just respond OK
-      res.status(200).json({ status: "ok" });
-    } catch (error) {
-      console.error("Error handling /callback:", error);
-      res.status(400).json({ error: "Invalid JSON" });
-    }
-  });
-
-  // GET /callback: simple test endpoint to check server is alive
-  app.get("/callback", (_req, res) => {
-    res.status(200).send("Callback endpoint is alive (GET)");
-  });
-
-  // Health check endpoint
-  app.get("/api/health", (_req, res) => {
-    res.status(200).json({
-      status: "online",
-      timestamp: new Date().toISOString(),
-      endpoint: "/callback",
-    });
-  });
-
-  // Create HTTP server for app and return it
-  const httpServer = createServer(app);
-  return httpServer;
+// Helper: verify SeaTalk signature (if needed)
+function verifySignature(signature: string, timestamp: string, nonce: string, body: string) {
+  const data = `${APP_SECRET}${timestamp}${nonce}${body}`;
+  const hash = crypto.createHash("sha256").update(data).digest("hex");
+  return hash === signature;
 }
+
+router.post("/", (req, res) => {
+  const signature = req.headers["x-seatalk-signature"] as string;
+  const timestamp = req.headers["x-seatalk-timestamp"] as string;
+  const nonce = req.headers["x-seatalk-nonce"] as string;
+  const bodyString = JSON.stringify(req.body);
+
+  // Optional: check signature
+  if (!verifySignature(signature, timestamp, nonce, bodyString)) {
+    return res.status(403).send("Invalid signature");
+  }
+
+  console.log("SeaTalk Event Received:", req.body);
+
+  // Example: respond to verification challenge
+  if (req.body?.type === "url_verification") {
+    return res.send(req.body.challenge);
+  }
+
+  // Example: handle message received event
+  if (req.body?.type === "message_received") {
+    console.log("Message text:", req.body?.message?.text);
+    // Here: send reply to user via SeaTalk API
+  }
+
+  res.send("ok");
+});
+
+export default router;
