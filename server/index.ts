@@ -9,10 +9,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 
-// Mount API routes
+// API routes
 app.use("/api", routes);
 
-// Mount SeaTalk callback route
+// SeaTalk callback
 app.use("/callback", callback);
 
 // Health check
@@ -21,5 +21,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
