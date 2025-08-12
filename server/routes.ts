@@ -1,9 +1,9 @@
 import { Router } from "express";
+import callbackRoute from "./callback";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  res.send("API is working");
-});
+// Register POST /callback endpoint
+router.use("/callback", callbackRoute);
 
 export default router;
