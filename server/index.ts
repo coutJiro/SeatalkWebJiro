@@ -1,18 +1,16 @@
 import express from "express";
+import routes from "./routes";
 
 const app = express();
+
+// Middleware to parse incoming JSON
 app.use(express.json());
 
-app.post("/callback", (req, res) => {
-  console.log("Incoming:", req.body);
-  if (req.body?.seatalk_challenge) {
-    res.send(req.body.seatalk_challenge);
-  } else {
-    res.status(400).send("Missing seatalk_challenge");
-  }
-});
+// Mount all routes
+app.use("/", routes);
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Start server
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
