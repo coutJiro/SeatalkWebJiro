@@ -1,25 +1,18 @@
 import express from "express";
 import bodyParser from "body-parser";
+import callbackRouter from "./callback";
 import routes from "./routes";
-import callback from "./callback";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
 app.use(bodyParser.json());
 
-// API routes
+// SeaTalk callback
+app.use("/callback", callbackRouter);
+
+// Your normal API routes
 app.use("/api", routes);
 
-// SeaTalk callback
-app.use("/callback", callback);
-
-// Health check
-app.get("/", (req, res) => {
-  res.send("Server is running 🚀");
-});
-
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
